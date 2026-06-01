@@ -20,14 +20,21 @@
 可选环境变量：
 
 - `PHINIX_REWORK_ROOT`：Phinix-Rework 仓库或发布产物根目录。
-- `PHINIX_CLIENT_COMMON`：包含 `Assemblies/03-Utils.dll`、`06-UserManagement.dll`、`07-ClientExtensionAbstractions.dll` 的客户端 `Common` 目录。
+- `PHINIX_CLIENT_COMMON`：包含 `Assemblies/03-Utils.dll`、`08-UserManagement.dll`、`10-ClientExtensionAbstractions.dll` 的客户端 `Common` 目录；旧编号发布仍可识别。
 - `PHINIX_SERVER_BIN`：包含服务端 `Utils.dll`、`UserManagement.dll` 的 Phinix-Rework 服务端输出目录。
+- `BUILD_CLIENT` / `BUILD_SERVER`：分别控制是否构建客户端/服务端，默认都启用。只拿到 Workshop 客户端包时可用 `BUILD_SERVER=0` 先构建客户端扩展。
 - `RIMWORLD_MANAGED`：RimWorld `Managed` 程序集目录；默认从当前 Mods 目录推导。
 
 ## 编译
 
 ```bash
 PHINIX_REWORK_ROOT=/path/to/Phinix-Rework ./build.sh
+```
+
+仅使用 Steam Workshop 客户端包构建客户端扩展：
+
+```bash
+BUILD_SERVER=0 PHINIX_REWORK_ROOT=/path/to/workshop/content/294100/3735269431 ./build.sh
 ```
 
 输出：
