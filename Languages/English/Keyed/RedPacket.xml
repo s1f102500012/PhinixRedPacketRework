@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+  <PRP_Tab>Red Packet</PRP_Tab>
+  <PRP_SettingsSection>Red packet</PRP_SettingsSection>
+  <PRP_EnableNotifications>Enable red packet notifications</PRP_EnableNotifications>
+  <PRP_EnableNotificationsDesc>Show an in-game message when a new red packet is available.</PRP_EnableNotificationsDesc>
+  <PRP_SendTitle>Send Red Packet</PRP_SendTitle>
+  <PRP_ListTitle>Red Packets</PRP_ListTitle>
+  <PRP_Search>Search</PRP_Search>
+  <PRP_Refresh>Refresh</PRP_Refresh>
+  <PRP_PacketCount>Packets</PRP_PacketCount>
+  <PRP_Type>Type</PRP_Type>
+  <PRP_Normal>Normal</PRP_Normal>
+  <PRP_Lucky>Lucky</PRP_Lucky>
+  <PRP_Send>Send</PRP_Send>
+  <PRP_Claim>Claim</PRP_Claim>
+  <PRP_Select>Select</PRP_Select>
+  <PRP_Amount>Amount</PRP_Amount>
+  <PRP_NoItems>No available items.</PRP_NoItems>
+  <PRP_NoPackets>No active red packets.</PRP_NoPackets>
+  <PRP_LoginRequired>Connect and log in to Phinix Rework first.</PRP_LoginRequired>
+  <PRP_ServerMissing>Server extension missing</PRP_ServerMissing>
+  <PRP_SelectItem>Select an item and amount.</PRP_SelectItem>
+  <PRP_Selected>Selected</PRP_Selected>
+  <PRP_InvalidPacketCount>Invalid packet count.</PRP_InvalidPacketCount>
+  <PRP_PacketCountTooLarge>Packet count must be less than or equal to the item amount.</PRP_PacketCountTooLarge>
+  <PRP_MinifiedRejected>Cannot send or claim uninstalled buildings in red packets.</PRP_MinifiedRejected>
+  <PRP_Sent>Sent red packet: {0} x{1}.</PRP_Sent>
+  <PRP_NewPacket>New red packet from {0}: {1} x{2}.</PRP_NewPacket>
+  <PRP_Reward>Claimed {0} x{1} from {2}.</PRP_Reward>
+  <PRP_Returned>Red packet expired. Returned {0} x{1}.</PRP_Returned>
+  <PRP_Failed>Red packet failed: {0}</PRP_Failed>
+  <PRP_RowItem>{0} x{1}</PRP_RowItem>
+  <PRP_RowRemaining>Remaining {0}/{1}, packets {2}/{3}, {4}</PRP_RowRemaining>
+  <PRP_RowSender>Sender {0}</PRP_RowSender>
+  <PRP_RowTime>Time {0}</PRP_RowTime>
+  <PRP_Claimed>Claimed</PRP_Claimed>
+  <PRP_Expired>Expired</PRP_Expired>
+  <PRP_Empty>Empty</PRP_Empty>
+  <PRP_Yours>Yours</PRP_Yours>
+  <PRP_Pending>Pending</PRP_Pending>
+</LanguageData>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+  <PRP_Tab>红包</PRP_Tab>
+  <PRP_SettingsSection>红包</PRP_SettingsSection>
+  <PRP_EnableNotifications>启用红包消息提醒</PRP_EnableNotifications>
+  <PRP_EnableNotificationsDesc>有新红包可领取时显示游戏内消息。</PRP_EnableNotificationsDesc>
+  <PRP_SendTitle>发红包</PRP_SendTitle>
+  <PRP_ListTitle>红包列表</PRP_ListTitle>
+  <PRP_Search>搜索</PRP_Search>
+  <PRP_Refresh>刷新</PRP_Refresh>
+  <PRP_PacketCount>红包个数</PRP_PacketCount>
+  <PRP_Type>类型</PRP_Type>
+  <PRP_Normal>普通红包</PRP_Normal>
+  <PRP_Lucky>拼手气红包</PRP_Lucky>
+  <PRP_Send>发送</PRP_Send>
+  <PRP_Claim>领取</PRP_Claim>
+  <PRP_Select>选择</PRP_Select>
+  <PRP_Amount>数量</PRP_Amount>
+  <PRP_NoItems>没有可用物资。</PRP_NoItems>
+  <PRP_NoPackets>没有可领取红包。</PRP_NoPackets>
+  <PRP_LoginRequired>请先连接并登录 Phinix Rework。</PRP_LoginRequired>
+  <PRP_ServerMissing>服务端扩展未安装</PRP_ServerMissing>
+  <PRP_SelectItem>请选择物品和数量。</PRP_SelectItem>
+  <PRP_Selected>已选</PRP_Selected>
+  <PRP_InvalidPacketCount>红包个数无效。</PRP_InvalidPacketCount>
+  <PRP_PacketCountTooLarge>红包个数不能大于物品数量。</PRP_PacketCountTooLarge>
+  <PRP_MinifiedRejected>红包不能发送或领取未安装建筑。</PRP_MinifiedRejected>
+  <PRP_Sent>已发送红包：{0} x{1}。</PRP_Sent>
+  <PRP_NewPacket>{0} 发了红包：{1} x{2}。</PRP_NewPacket>
+  <PRP_Reward>从 {2} 的红包中领取了 {0} x{1}。</PRP_Reward>
+  <PRP_Returned>红包已过期，返还 {0} x{1}。</PRP_Returned>
+  <PRP_Failed>红包操作失败：{0}</PRP_Failed>
+  <PRP_RowItem>{0} x{1}</PRP_RowItem>
+  <PRP_RowRemaining>剩余 {0}/{1}，红包 {2}/{3}，{4}</PRP_RowRemaining>
+  <PRP_RowSender>发送者 {0}</PRP_RowSender>
+  <PRP_RowTime>剩余时间 {0}</PRP_RowTime>
+  <PRP_Claimed>已领取</PRP_Claimed>
+  <PRP_Expired>已过期</PRP_Expired>
+  <PRP_Empty>已抢完</PRP_Empty>
+  <PRP_Yours>你的红包</PRP_Yours>
+  <PRP_Pending>处理中</PRP_Pending>
+</LanguageData>

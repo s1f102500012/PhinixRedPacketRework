@@ -1,0 +1,12 @@
+.DS_Store
+.build/
+bin/
+obj/
+*.user
+*.suo
+*.pdb
+*.mdb
+
+# Built artifacts. Run ./build.sh to regenerate them.
+Assemblies/*.dll
+ServerExtensions/*.dll

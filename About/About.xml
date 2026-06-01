@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ModMetaData>
+  <name>Phinix Rework Red Packet</name>
+  <packageId>natsuki.phinixredpacketrework</packageId>
+  <author>Natsuki</author>
+  <url>https://github.com/HunYuan2333/Phinix-Rework</url>
+  <description>
+Adds a red packet submod for Phinix Rework. Requires the matching server extension to be installed on the Phinix Rework server.
+为 Phinix Rework 添加红包附属模组。需要在 Phinix Rework 服务端同时安装对应的服务端扩展。
+  </description>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>hunyuan2333.phinixrework</packageId>
+      <displayName>phinix-rework</displayName>
+      <downloadUrl>https://github.com/HunYuan2333/Phinix-Rework/releases</downloadUrl>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>hunyuan2333.phinixrework</li>
+  </loadAfter>
+</ModMetaData>
