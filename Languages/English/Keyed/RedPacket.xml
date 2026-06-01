@@ -4,6 +4,10 @@
   <PRP_SettingsSection>Red packet</PRP_SettingsSection>
   <PRP_EnableNotifications>Enable red packet notifications</PRP_EnableNotifications>
   <PRP_EnableNotificationsDesc>Show an in-game message when a new red packet is available.</PRP_EnableNotificationsDesc>
+  <PRP_AllItems>Allow all map items</PRP_AllItems>
+  <PRP_AllItemsDesc>When off, only stockpile items are listed.</PRP_AllItemsDesc>
+  <PRP_DropCurrentMap>Drop rewards on current map</PRP_DropCurrentMap>
+  <PRP_DropCurrentMapDesc>When off, rewards are dropped on any player home map first.</PRP_DropCurrentMapDesc>
   <PRP_SendTitle>Send Red Packet</PRP_SendTitle>
   <PRP_ListTitle>Red Packets</PRP_ListTitle>
   <PRP_Search>Search</PRP_Search>

@@ -4,6 +4,10 @@
   <PRP_SettingsSection>红包</PRP_SettingsSection>
   <PRP_EnableNotifications>启用红包消息提醒</PRP_EnableNotifications>
   <PRP_EnableNotificationsDesc>有新红包可领取时显示游戏内消息。</PRP_EnableNotificationsDesc>
+  <PRP_AllItems>允许发送全部地图物品</PRP_AllItems>
+  <PRP_AllItemsDesc>关闭时只列出仓储区中的物品。</PRP_AllItemsDesc>
+  <PRP_DropCurrentMap>奖励投放到当前地图</PRP_DropCurrentMap>
+  <PRP_DropCurrentMapDesc>关闭时优先投放到任意玩家基地地图。</PRP_DropCurrentMapDesc>
   <PRP_SendTitle>发红包</PRP_SendTitle>
   <PRP_ListTitle>红包列表</PRP_ListTitle>
   <PRP_Search>搜索</PRP_Search>

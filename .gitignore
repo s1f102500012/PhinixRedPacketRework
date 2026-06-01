@@ -2,6 +2,7 @@
 .build/
 bin/
 obj/
+Output/
 *.user
 *.suo
 *.pdb

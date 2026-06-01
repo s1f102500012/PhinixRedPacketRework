@@ -6,6 +6,7 @@ using PhinixClient.Framework;
 using RimWorld;
 using UnityEngine;
 using UserManagement;
+using Utils;
 using Utils.Framework;
 using Verse;
 using Thing = Verse.Thing;
@@ -27,9 +28,13 @@ namespace Natsuki.PhinixRedPacketRework.Client
         private const float RowHeight = 32f;
         private const float PacketRowHeight = 82f;
         private const string NotificationSettingKey = "redpacket.notifications";
+        private const string AllItemsSettingKey = "redpacket.allItems";
+        private const string DropCurrentMapSettingKey = "redpacket.dropCurrentMap";
+        private const string ReturnedPacketIdsSettingKey = "redpacket.returnedPacketIds";
 
         private readonly RedPacketClientState state = new RedPacketClientState();
         private readonly HashSet<string> seenPacketIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> returnedPacketIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly object itemCacheLock = new object();
 
         private IFrameworkClientTransport frameworkTransport;
@@ -40,6 +45,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
         private IClientUserDirectory userDirectory;
         private IClientMainThreadDispatcher mainThreadDispatcher;
         private IClientUserEventStream userEvents;
+        private Action<string, LogLevel> hostLog;
 
         private EventHandler<FrameworkCompatibilityModeChangedEventArgs> compatibilityChangedHandler;
         private EventHandler disconnectedHandler;
@@ -56,6 +62,8 @@ namespace Natsuki.PhinixRedPacketRework.Client
         private RedPacketKind packetKind = RedPacketKind.Lucky;
         private DateTime nextItemRefreshUtc = DateTime.MinValue;
         private bool hasReceivedSnapshot;
+        private int claimableCount;
+        private string returnedPacketIdsRaw = string.Empty;
 
         public string ExtensionId => RedPacketProtocol.Capability;
 
@@ -78,8 +86,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
                     return string.Empty;
                 }
 
-                int claimable = state.CountClaimable(sessionContext.Uuid, DateTime.UtcNow);
-                return claimable > 0 ? claimable.ToString() : string.Empty;
+                return claimableCount > 0 ? claimableCount.ToString() : string.Empty;
             }
         }
 
@@ -99,6 +106,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
                 return;
             }
 
+            hostLog = hostContext.Log;
             frameworkTransport = hostContext.GetRequiredService<IFrameworkClientTransport>();
             commandTransport = hostContext.GetRequiredService<IFrameworkClientCommandTransport>();
             lifecycle = hostContext.GetRequiredService<IFrameworkClientLifecycle>();
@@ -125,6 +133,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
                 {
                     state.ReplacePackets(Array.Empty<RedPacketStateSnapshot>());
                     hasReceivedSnapshot = false;
+                    claimableCount = 0;
                     seenPacketIds.Clear();
                 };
             }
@@ -216,6 +225,22 @@ namespace Natsuki.PhinixRedPacketRework.Client
             {
                 settings.Set(NotificationSettingKey, notifications);
             }
+
+            bool allItems = settings.Get(AllItemsSettingKey, false);
+            bool originalAllItems = allItems;
+            listing.CheckboxLabeled("PRP_AllItems".Translate(), ref allItems, "PRP_AllItemsDesc".Translate());
+            if (allItems != originalAllItems)
+            {
+                settings.Set(AllItemsSettingKey, allItems);
+            }
+
+            bool dropCurrentMap = settings.Get(DropCurrentMapSettingKey, false);
+            bool originalDropCurrentMap = dropCurrentMap;
+            listing.CheckboxLabeled("PRP_DropCurrentMap".Translate(), ref dropCurrentMap, "PRP_DropCurrentMapDesc".Translate());
+            if (dropCurrentMap != originalDropCurrentMap)
+            {
+                settings.Set(DropCurrentMapSettingKey, dropCurrentMap);
+            }
         }
 
         public bool IsVisible(IClientSettingsContext settings)
@@ -271,7 +296,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
             }
             catch (Exception exception)
             {
-                Log.Warning("[PhinixRedPacket] Failed to handle command '" + command?.MessageType + "': " + exception);
+                LogWarning("Failed to handle command '" + command?.MessageType + "'.", exception);
             }
         }
 
@@ -284,6 +309,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
             List<RedPacketStateSnapshot> packets = payload?.Packets ?? new List<RedPacketStateSnapshot>();
             bool notify = hasReceivedSnapshot && settingsContext.Get(NotificationSettingKey, true);
             state.ReplacePackets(packets);
+            UpdateClaimableCount();
 
             foreach (RedPacketStateSnapshot packet in packets)
             {
@@ -332,6 +358,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
                     targets);
             }
 
+            UpdateClaimableCount();
             RequestSnapshot();
         }
 
@@ -347,6 +374,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
             {
                 state.RemovePendingClaim(payload.PacketId);
             }
+            UpdateClaimableCount();
 
             string message = string.IsNullOrEmpty(payload.Message) ? payload.Reason.ToString() : payload.Message;
             Messages.Message("PRP_Failed".Translate(message), MessageTypeDefOf.RejectInput, historical: false);
@@ -644,6 +672,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
             }
 
             state.AddPendingClaim(packet.PacketId);
+            UpdateClaimableCount();
             RedPacketClaimRequest request = new RedPacketClaimRequest { PacketId = packet.PacketId };
             FrameworkPacket command = RedPacketProtocol.CreateCommand(
                 RedPacketProtocol.ClaimRequestType,
@@ -654,6 +683,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
             if (!commandTransport.TryHandleOutgoingCommand(command))
             {
                 state.RemovePendingClaim(packet.PacketId);
+                UpdateClaimableCount();
                 Messages.Message("PRP_ServerMissing".Translate(), MessageTypeDefOf.RejectInput, historical: false);
             }
         }
@@ -670,7 +700,10 @@ namespace Natsuki.PhinixRedPacketRework.Client
                 sessionContext.SessionId,
                 sessionContext.Uuid,
                 null);
-            commandTransport.TryHandleOutgoingCommand(command);
+            if (!commandTransport.TryHandleOutgoingCommand(command))
+            {
+                LogWarning("Snapshot request was not handled by the command pipeline.");
+            }
         }
 
         private void RefreshItemsIfNeeded(bool force)
@@ -791,7 +824,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
             bool mine = string.Equals(packet.SenderUuid, sessionContext?.Uuid, StringComparison.OrdinalIgnoreCase);
             if (packet.Expired)
             {
-                return mine && packet.RemainingCount > 0 && !(RedPacketMod.Settings?.HasReturned(packet.PacketId) ?? false);
+                return mine && packet.RemainingCount > 0 && !HasReturnedPacket(packet.PacketId);
             }
 
             return packet.RemainingCount > 0 || mine || RedPacketClientState.HasClaimed(packet, sessionContext?.Uuid);
@@ -858,7 +891,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
                     !packet.Expired ||
                     packet.RemainingCount <= 0 ||
                     !string.Equals(packet.SenderUuid, localUuid, StringComparison.OrdinalIgnoreCase) ||
-                    (RedPacketMod.Settings?.HasReturned(packet.PacketId) ?? false) ||
+                    HasReturnedPacket(packet.PacketId) ||
                     !state.MarkExpiredReturned(packet.PacketId))
                 {
                     continue;
@@ -866,7 +899,7 @@ namespace Natsuki.PhinixRedPacketRework.Client
 
                 List<Thing> returned = RedPacketItemConverter.ToThings(packet.Item, packet.RemainingCount);
                 LookTargets targets = RedPacketItemConverter.DropThings(returned, DropOnCurrentMap);
-                RedPacketMod.Settings?.MarkReturned(packet.PacketId);
+                MarkReturnedPacket(packet.PacketId);
                 MessageNeutral("PRP_Returned".Translate(
                     RedPacketItemConverter.LabelFor(packet.Item),
                     packet.RemainingCount),
@@ -879,9 +912,71 @@ namespace Natsuki.PhinixRedPacketRework.Client
             return frameworkTransport != null && frameworkTransport.HasRemoteCapability(RedPacketProtocol.Capability);
         }
 
-        private bool AllItemsTradable => settingsContext != null && settingsContext.Get("trade.allItemsTradable", false);
+        private bool AllItemsTradable => settingsContext != null && settingsContext.Get(AllItemsSettingKey, false);
 
-        private bool DropOnCurrentMap => settingsContext != null && settingsContext.Get("trade.dropCurrentMap", false);
+        private bool DropOnCurrentMap => settingsContext != null && settingsContext.Get(DropCurrentMapSettingKey, false);
+
+        private void UpdateClaimableCount()
+        {
+            claimableCount = sessionContext == null || !sessionContext.LoggedIn
+                ? 0
+                : state.CountClaimable(sessionContext.Uuid, DateTime.UtcNow);
+        }
+
+        private void LogWarning(string message, Exception exception = null)
+        {
+            if (hostLog == null)
+            {
+                return;
+            }
+
+            string text = exception == null
+                ? "[PhinixRedPacket] " + message
+                : "[PhinixRedPacket] " + message + Environment.NewLine + exception;
+            hostLog(text, LogLevel.WARNING);
+        }
+
+        private bool HasReturnedPacket(string packetId)
+        {
+            if (settingsContext == null || string.IsNullOrEmpty(packetId))
+            {
+                return false;
+            }
+
+            string returned = settingsContext.Get(ReturnedPacketIdsSettingKey, string.Empty);
+            RefreshReturnedPacketCache(returned);
+            return returnedPacketIds.Contains(packetId);
+        }
+
+        private void MarkReturnedPacket(string packetId)
+        {
+            if (settingsContext == null || string.IsNullOrEmpty(packetId) || HasReturnedPacket(packetId))
+            {
+                return;
+            }
+
+            string returned = settingsContext.Get(ReturnedPacketIdsSettingKey, string.Empty);
+            string updated = string.IsNullOrEmpty(returned) ? packetId : returned + "|" + packetId;
+            settingsContext.Set(ReturnedPacketIdsSettingKey, updated);
+            RefreshReturnedPacketCache(updated);
+            returnedPacketIds.Add(packetId);
+        }
+
+        private void RefreshReturnedPacketCache(string raw)
+        {
+            raw = raw ?? string.Empty;
+            if (string.Equals(raw, returnedPacketIdsRaw, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            returnedPacketIdsRaw = raw;
+            returnedPacketIds.Clear();
+            foreach (string packetId in raw.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                returnedPacketIds.Add(packetId);
+            }
+        }
 
         private string DisplayNameFor(string uuid, string fallback)
         {
